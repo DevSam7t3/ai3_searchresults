@@ -1,39 +1,32 @@
-// import axios from "axios";
-// import { load } from "cheerio";
-
-// // Define the search query
-// const searchQuery = "devsam";
-
-// const link = `https://www.googleapis.com/customsearch/v1?key=INSERT_YOUR_API_KEY&cx=017576662512468239146:omuauf_lfve&q=lectures`;
-
-// // Create the Google search URL
-// const searchURL = `https://www.google.com/search?q=${encodeURIComponent(
-//   searchQuery
-// )}`;
-
-// // Send an HTTP GET request to Google
-// axios
-//   .get(searchURL)
-//   .then((response) => {
-//     // Load the HTML content of the search results page
-//     const html = response.data;
-
-//     // Parse the HTML content using Cheerio
-//     const $ = load(html);
-
-//     // Extract and process search results
-//     $("h3").each((index, element) => {
-//       // Example: Log the titles of the search results
-//       const title = $(element).text();
-//       console.log(`Result ${index + 1}: ${title}`);
-//     });
-//   })
-//   .catch((error) => {
-//     console.error("Error:", error);
-//   });
 import axios from "axios";
 import { load } from "cheerio";
 import "dotenv/config";
+
+const apiKey = process.env.OPEN_AI_API_KEY || "";
+
+async function chatWithGPT3(userPrompt) {
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/engines/text-davinci-002/completions",
+      {
+        prompt: `Summarize the following content and remove any duplicated content  "${userPrompt}"`,
+        max_tokens: 100, // Adjust as needed
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log(
+      "🚀 ~ file: index.js:24 ~ chatWithGPT3 ~ response.data.choices[0].text:",
+      response.data.choices[0].text
+    );
+  } catch (error) {
+    console.log("🚀 ~ file: index.js:25 ~ chatWithGPT3 ~ error:", error);
+  }
+}
 
 // Step 3: Send a query to Google Custom Search API
 async function searchGoogle(query) {
@@ -82,7 +75,7 @@ async function scrapeWebsites(urls) {
 const query = "top places to visit in swat valley pakistan";
 searchGoogle(query)
   .then((scrapedContent) => {
-    console.log("Scraped Content:", scrapedContent);
+    chatWithGPT3(JSON.stringify(scrapedContent));
   })
   .catch((error) => {
     console.error("Error:", error);
